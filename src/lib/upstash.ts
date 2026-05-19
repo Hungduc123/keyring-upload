@@ -1,18 +1,54 @@
 import { Index } from "@upstash/vector";
 
-declare global {
-  var __upstashIndex: Index | undefined;
+export const PROJECTS = ["keyring", "coinpool"] as const;
+export type ProjectKey = (typeof PROJECTS)[number];
+
+export const DEFAULT_PROJECT: ProjectKey = "keyring";
+
+export function isProjectKey(value: unknown): value is ProjectKey {
+  return (
+    typeof value === "string" && (PROJECTS as readonly string[]).includes(value)
+  );
 }
 
-export const vectorIndex =
-  global.__upstashIndex ??
-  new Index({
-    url: process.env.UPSTASH_VECTOR_REST_URL!,
-    token: process.env.UPSTASH_VECTOR_REST_TOKEN!,
-  });
+type ProjectConfig = { url: string | undefined; token: string | undefined };
 
-if (process.env.NODE_ENV !== "production") {
-  global.__upstashIndex = vectorIndex;
+function getProjectConfig(project: ProjectKey): ProjectConfig {
+  switch (project) {
+    case "keyring":
+      return {
+        url: process.env.UPSTASH_VECTOR_REST_URL,
+        token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+      };
+    case "coinpool":
+      return {
+        url: process.env.UPSTASH_VECTOR_REST_URL_COINPOOL,
+        token: process.env.UPSTASH_VECTOR_REST_TOKEN_COINPOOL,
+      };
+  }
+}
+
+declare global {
+  var __upstashIndexes: Partial<Record<ProjectKey, Index>> | undefined;
+}
+
+export function getVectorIndex(project: ProjectKey = DEFAULT_PROJECT): Index {
+  const cache = (global.__upstashIndexes ??= {});
+  const existing = cache[project];
+  if (existing) return existing;
+
+  const { url, token } = getProjectConfig(project);
+  if (!url || !token) {
+    throw new Error(
+      `Upstash credentials missing for project "${project}". Set the corresponding env vars.`,
+    );
+  }
+
+  const index = new Index({ url, token });
+  if (process.env.NODE_ENV !== "production") {
+    cache[project] = index;
+  }
+  return index;
 }
 
 export type FaqItem = {

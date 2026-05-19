@@ -17,8 +17,15 @@ type Mode = "file" | "manual";
 
 const EMPTY_ITEM: FaqItem = { question: "", answer: "" };
 
+const PROJECT_OPTIONS = [
+  { value: "keyring", label: "Keyring" },
+  { value: "coinpool", label: "Coinpool" },
+] as const;
+type ProjectKey = (typeof PROJECT_OPTIONS)[number]["value"];
+
 export default function UploadPage() {
   const router = useRouter();
+  const [project, setProject] = useState<ProjectKey>("keyring");
   const [mode, setMode] = useState<Mode>("file");
 
   const [fileName, setFileName] = useState<string | null>(null);
@@ -129,7 +136,7 @@ export default function UploadPage() {
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: payload }),
+        body: JSON.stringify({ project, items: payload }),
       });
       const data: UploadResponse | { error: string } = await res
         .json()
@@ -175,6 +182,31 @@ export default function UploadPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
+        <div className="mb-6 flex items-center gap-3">
+          <label
+            htmlFor="project"
+            className="text-sm font-medium text-slate-700 dark:text-slate-300"
+          >
+            Project
+          </label>
+          <select
+            id="project"
+            value={project}
+            onChange={(e) => {
+              setProject(e.target.value as ProjectKey);
+              setResult(null);
+              setTopError(null);
+            }}
+            className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {PROJECT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 mb-6">
           <ModeButton active={mode === "file"} onClick={() => setMode("file")}>
             Upload JSON file
@@ -306,7 +338,9 @@ export default function UploadPage() {
               disabled={submitting || payload.length === 0}
               className="rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium px-5 py-2.5"
             >
-              {submitting ? "Uploading..." : "Upload to Upstash"}
+              {submitting
+                ? "Uploading..."
+                : `Upload to ${PROJECT_OPTIONS.find((p) => p.value === project)?.label ?? "Upstash"}`}
             </button>
           </div>
         </form>

@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
-import { isFaqItem, vectorIndex, type FaqItem } from "@/lib/upstash";
+import {
+  DEFAULT_PROJECT,
+  getVectorIndex,
+  isFaqItem,
+  isProjectKey,
+  type FaqItem,
+} from "@/lib/upstash";
 
 export const runtime = "nodejs";
 
@@ -40,6 +46,18 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json(
       { error: "Invalid JSON body" },
+      { status: 400 },
+    );
+  }
+
+  const projectRaw =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as { project?: unknown }).project
+      : undefined;
+  const project = isProjectKey(projectRaw) ? projectRaw : DEFAULT_PROJECT;
+  if (projectRaw !== undefined && !isProjectKey(projectRaw)) {
+    return NextResponse.json(
+      { error: `Unknown project "${String(projectRaw)}"` },
       { status: 400 },
     );
   }
@@ -117,6 +135,14 @@ export async function POST(req: Request) {
 
   const batches = await chunk(records, BATCH_SIZE);
 
+  let vectorIndex;
+  try {
+    vectorIndex = getVectorIndex(project);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
   for (const batch of batches) {
     try {
       await vectorIndex.upsert(batch);
@@ -133,9 +159,19 @@ export async function POST(req: Request) {
   return NextResponse.json(result, { status });
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const projectRaw = url.searchParams.get("project");
+  if (projectRaw !== null && !isProjectKey(projectRaw)) {
+    return NextResponse.json(
+      { error: `Unknown project "${projectRaw}"` },
+      { status: 400 },
+    );
+  }
+  const project = isProjectKey(projectRaw) ? projectRaw : DEFAULT_PROJECT;
+
   try {
-    const info = await vectorIndex.info();
+    const info = await getVectorIndex(project).info();
     return NextResponse.json(info);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
