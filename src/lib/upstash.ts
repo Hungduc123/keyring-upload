@@ -1,6 +1,6 @@
 import { Index } from "@upstash/vector";
 
-export const PROJECTS = ["keyring", "coinpool"] as const;
+export const PROJECTS = ["keyring", "coinpool", "coinpool-prod"] as const;
 export type ProjectKey = (typeof PROJECTS)[number];
 
 export const DEFAULT_PROJECT: ProjectKey = "keyring";
@@ -24,6 +24,11 @@ function getProjectConfig(project: ProjectKey): ProjectConfig {
       return {
         url: process.env.UPSTASH_VECTOR_REST_URL_COINPOOL,
         token: process.env.UPSTASH_VECTOR_REST_TOKEN_COINPOOL,
+      };
+    case "coinpool-prod":
+      return {
+        url: process.env.UPSTASH_VECTOR_REST_URL_COINPOOL_PROD,
+        token: process.env.UPSTASH_VECTOR_REST_TOKEN_COINPOOL_PROD,
       };
   }
 }

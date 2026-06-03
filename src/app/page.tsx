@@ -20,6 +20,7 @@ const EMPTY_ITEM: FaqItem = { question: "", answer: "" };
 const PROJECT_OPTIONS = [
   { value: "keyring", label: "Keyring" },
   { value: "coinpool", label: "Coinpool" },
+  { value: "coinpool-prod", label: "Coinpool (Production)" },
 ] as const;
 type ProjectKey = (typeof PROJECT_OPTIONS)[number]["value"];
 
