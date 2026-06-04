@@ -18,15 +18,16 @@ type Mode = "file" | "manual";
 const EMPTY_ITEM: FaqItem = { question: "", answer: "" };
 
 const PROJECT_OPTIONS = [
-  { value: "keyring", label: "Keyring" },
+  { value: "keyring-app", label: "Keyring" },
   { value: "coinpool", label: "Coinpool" },
   { value: "coinpool-prod", label: "Coinpool (Production)" },
+  { value: "nft-viewer", label: "NFT Viewer" },
 ] as const;
 type ProjectKey = (typeof PROJECT_OPTIONS)[number]["value"];
 
 export default function UploadPage() {
   const router = useRouter();
-  const [project, setProject] = useState<ProjectKey>("keyring");
+  const [project, setProject] = useState<ProjectKey>("keyring-app");
   const [mode, setMode] = useState<Mode>("file");
 
   const [fileName, setFileName] = useState<string | null>(null);

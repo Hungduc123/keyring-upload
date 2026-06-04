@@ -1,9 +1,14 @@
 import { Index } from "@upstash/vector";
 
-export const PROJECTS = ["keyring", "coinpool", "coinpool-prod"] as const;
+export const PROJECTS = [
+  "keyring-app",
+  "coinpool",
+  "coinpool-prod",
+  "nft-viewer",
+] as const;
 export type ProjectKey = (typeof PROJECTS)[number];
 
-export const DEFAULT_PROJECT: ProjectKey = "keyring";
+export const DEFAULT_PROJECT: ProjectKey = "keyring-app";
 
 export function isProjectKey(value: unknown): value is ProjectKey {
   return (
@@ -15,7 +20,7 @@ type ProjectConfig = { url: string | undefined; token: string | undefined };
 
 function getProjectConfig(project: ProjectKey): ProjectConfig {
   switch (project) {
-    case "keyring":
+    case "keyring-app":
       return {
         url: process.env.UPSTASH_VECTOR_REST_URL,
         token: process.env.UPSTASH_VECTOR_REST_TOKEN,
@@ -29,6 +34,11 @@ function getProjectConfig(project: ProjectKey): ProjectConfig {
       return {
         url: process.env.UPSTASH_VECTOR_REST_URL_COINPOOL_PROD,
         token: process.env.UPSTASH_VECTOR_REST_TOKEN_COINPOOL_PROD,
+      };
+    case "nft-viewer":
+      return {
+        url: process.env.UPSTASH_VECTOR_REST_URL_NFT_VIEWER,
+        token: process.env.UPSTASH_VECTOR_REST_TOKEN_NFT_VIEWER,
       };
   }
 }
