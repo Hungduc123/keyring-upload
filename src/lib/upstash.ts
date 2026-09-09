@@ -5,6 +5,7 @@ export const PROJECTS = [
   "coinpool",
   "coinpool-prod",
   "nft-viewer",
+  "keyring-one",
 ] as const;
 export type ProjectKey = (typeof PROJECTS)[number];
 
@@ -39,6 +40,11 @@ function getProjectConfig(project: ProjectKey): ProjectConfig {
       return {
         url: process.env.UPSTASH_VECTOR_REST_URL_NFT_VIEWER,
         token: process.env.UPSTASH_VECTOR_REST_TOKEN_NFT_VIEWER,
+      };
+    case "keyring-one":
+      return {
+        url: process.env.UPSTASH_VECTOR_REST_URL_KEYRING_ONE,
+        token: process.env.UPSTASH_VECTOR_REST_TOKEN_KEYRING_ONE,
       };
   }
 }

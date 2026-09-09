@@ -22,6 +22,7 @@ const PROJECT_OPTIONS = [
   { value: "coinpool", label: "Coinpool" },
   { value: "coinpool-prod", label: "Coinpool (Production)" },
   { value: "nft-viewer", label: "NFT Viewer" },
+  { value: "keyring-one", label: "Keyring One" },
 ] as const;
 type ProjectKey = (typeof PROJECT_OPTIONS)[number]["value"];
 
