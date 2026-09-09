@@ -1,0 +1,112 @@
+[
+  {
+    "question": "What is KEYRING ONE?",
+    "answer":  "KEYRING ONE is a product of Bacoor Company (bacoor.io), built to provide secure, practical, and transparent digital asset management for individuals, teams, and organizations. It supports real business use cases such as multisig asset control, revenue distribution, and operational wallet management. KEYRING ONE is also verifiable, open source, and audited, helping users and partners review its foundation with greater confidence."
+  },
+  {
+    "question": "What is KEYRING ONE, and what business problems does it solve?",
+    "answer":  "KEYRING ONE is Your Trusted Business Partner.KEYRING ONE delivers efficient business solutions for individuals and organizations, supporting digital asset management, revenue sharing, and a wide range of operational needs."
+  },
+  {
+    "question": "Has the Multisig Account smart contract been audited?",
+    "answer":  "Yes. The Multisig Account smart contract is open source and has been independently audited by BlockSec, providing an additional layer of security and transparency."
+  },
+  {
+    "question": "Is the Multisig Account secure?",
+    "answer":  "The Multisig Account smart contract has undergone an independent security audit by BlockSec, helping ensure the contract's security and reliability."
+  },
+  {
+    "question": "What’s multisig account?",
+    "answer":  "A multisig account helps users manage digital assets with stronger security and control. Users can set up to 05 approval address, and withdrawals require multisig approval before they can be executed. The multisig account can receive assets from any wallet, but withdrawals are limited to designated addresses. Each approval process must be completed within 10 minutes to reduce risk and protect shared assets."
+  },
+  {
+    "question": "How secure is the Multisig Account?",
+    "answer":  "A secure multisig account protects digital assets with multisig approvals, reducing single-wallet risk and strengthening transaction control."
+  },
+  {
+    "question": "What are the advantages of a multisig account?",
+    "answer":  "Reduced Single-Wallet Risk\nWithdrawals require approval from multiple designated addresses, so one compromised address cannot easily move assets alone.\nBetter Control For Organization\nThe multisig account helps teams manage shared assets with clear approval rights, making it suitable for business funds, project treasuries, or revenue management.\nSafer Withdrawal Process\nWithdrawals are limited to designated wallets and must be approved within 10 minutes, helping prevent unauthorized or delayed actions."
+  },
+  {
+    "question": "What are Distribution Settings?",
+    "answer":  "Distribution settings is a feature that automatically distributes revenue from one wallet to multiple designated wallets on a daily basis. Users can set the receiving wallets and split supported stablecoin funds, making revenue sharing faster, more transparent, and easier to manage for individuals, teams, and organizations."
+  },{
+    "question": "Why choose Distribution Settings?",
+    "answer":  "Automated\nRevenue is split and sent daily without manual work.\nTransparent\nEach designated address receives its allocated share based on the configured distribution ratio.\nScalable\nSuitable for teams, partners, and business revenue.\nStable\nPayments are made in supported stablecoins to reduce volatility."
+  },
+  {
+    "question": "What are Auto Swap & Distribution Settings?",
+    "answer":  "Auto swap & Distribution settings automatically converts incoming revenue from supported stablecoins into designated payout assets, then distributes it to selected addresses based on your setup. It helps teams and organizations simplify revenue operations, reduce manual conversion steps, and manage payouts with greater flexibility."
+  },
+  {
+    "question": "How do I set up Auto Swap & Distribution?",
+    "answer":  "To set up Auto Swap & Distribution, follow these three steps:\n1. Set Designated Recipients\n2. Choose Payout Assets\n3. Automatically Swap & Distribute Daily"
+  },
+  {
+    "question": "About Ordinary Multisig Account Creation",
+    "answer": "Ordinary Multisig Account is a secure multi-signature wallet that allows multiple signers to jointly manage digital assets.Your assets are protected by a multi-signature (multisig) wallet, requiring the configured number of signer approvals before any withdrawal can be executed.\nAdd multiple signer addresses and configure the required approval threshold.\nAssets remain securely stored until the required number of signatures is collected.\nSigners can safely manage assets together without sharing private keys.\nOnce created, the multisig account type cannot be changed."
+  },{
+    "question": "About Multisig Account with USDC Auto-Lending",
+    "answer":  "Multisig Account with USDC Auto-Lending combines secure multi-signature asset management with automated USDC lending to generate yield.\nYour assets are protected by a multisig wallet. Withdrawals require the configured number of signer approvals.\nAny USDC received by the multisig account will be automatically supplied to your selected lending protocol.\nYou can change your lending protocol at any time. Newly received USDC will be supplied to the newly selected protocol.\nReceipt tokens (e.g. vault shares) remain securely stored in your multisig account."
+  },
+  {
+    "question": "Multisig account name",
+    "answer":  "An optional name to help you identify your multisig account.The multisig account name is for display purposes only and does not affect ownership, permissions, or security settings."
+  },
+  {
+    "question": "What are the Signers of a Multisig Account?",
+    "answer":  "Signers are the addresses authorized to approve asset withdrawal requests from this multisig account.\nRequiring approvals from multiple signers address significantly increases security by reducing the risk of a single compromised wallet, lost private key, or unauthorized withdrawal.\nAssets can only be withdrawn after the required number of signer approvals has been obtained."
+  },
+  {
+    "question": "What is the Threshold of a Multisig Account?",
+    "answer":  "Threshold defines the minimum number of signer approvals required to execute an asset withdrawal transaction from the multisig account.\nA higher threshold provides stronger security by preventing any single signer from moving assets without sufficient authorization.\nExamples:\n• 2 of 3 signers → Any 2 signers must approve the transaction.\n• 3 of 3 signers → All 3 signers must approve the transaction."
+  },{
+    "question": "Multisig feature type",
+    "answer":  "There are two Multisig feature types: Ordinary Multisig Account and Multisig Account with USDC Auto-Lending.\nOrdinary Multisig Account is a secure multisignature account designed to manage and control your assets. Transactions require signatures based on the configured threshold.\nMultisig Account with USDC Auto-Lending is a multisignature account with automated USDC lending. Available USDC will be automatically supplied to your selected lending partner daily at 00:00 UTC to earn yield."
+  },
+  {
+    "question": "Can the Multisig Account settings be changed?",
+    "answer":  "No. Once created, the Multisig Account settings cannot be changed. You can only create a new Multisig Account."
+  },
+  {
+    "question": "What is the minimum and maximum number of Signers?",
+    "answer":  "You can set a minimum of 3 and a maximum of 5 Signers."
+  },
+  {
+    "question": "About Distribution Settings",
+    "answer":  "Distribution Settings allows you to automatically distribute your supported assets from your wallet to multiple recipient addresses based on the ratios and schedule you configure.\nConfigure multiple recipient addresses and assign a percentage to each address. The total distribution ratio must equal 100%.\nChoose how often and when distributions are executed. The system will automatically perform the distribution according to your schedule.\nOnly the selected asset will be distributed. Other assets in your wallet are not affected.\nYou can update the recipient addresses, distribution ratios, and schedule at any time. New settings will be applied to future distributions.\nMake sure your wallet has sufficient token balance before the scheduled distribution time. If the balance is insufficient, the distribution will not be executed.\nA transaction fee is charged for each distribution. The fee already includes the required blockchain gas fee, so no gas fee is required."
+  },{
+    "question": "What are the Forwarding Address and Ratio in Distribution Settings?",
+    "answer":  "Configure the forwarding addresses and the percentage of funds allocated to each address. Assets in your address will be automatically distributed to the specified addresses according to the configured ratios."
+  },
+  {
+    "question": "Why do I need to set a Distribution Time?",
+    "answer":  "Choose when automatic distributions should be executed.\nYou can distribute funds:\n• Hourly (every hour)\n• Daily at a specific UTC time\nThe system will automatically process distributions according to the selected schedule."
+  },
+  {
+    "question": "About Auto Swap & Distribution Settings",
+    "answer":  "Auto Swap & Distribution Settings allows you to automatically swap your supported assets into another supported token and distribute the swapped assets to one or multiple recipient addresses based on your configured schedule.\nSelect the asset you want to swap from and choose the destination token.\nYou can send the swapped assets to your current wallet address or distribute them to multiple recipient addresses by assigning a percentage to each address. The total distribution ratio must equal 100%.\nConfigure the distribution frequency and execution time. The system will automatically perform the swap and distribution according to your schedule.\nThe swap amount depends on your available balance at the scheduled execution time. If the balance is insufficient, the transaction will not be executed.\nYou can modify the swap token, recipient settings, distribution ratios, and schedule at any time. The updated settings will apply to future executions.\nA transaction fee is charged for each distribution. The fee already includes the required blockchain gas fee, so no gas fee is required."
+  },
+  {
+    "question": "Why do I need to select a “Swap To” token in Auto Swap & Distribution Settings?",
+    "answer":  "The selected supported asset in your address will be automatically swapped into the token you select and distributed to your configured forwarding addresses"
+  },{
+    "question": "Who can be a Recipient in Auto Swap & Distribution Settings?",
+    "answer":  "The Recipient can be your current address, or you can add a Forwarding Address and specify the distribution ratio for each address."
+  },
+  {
+    "question": "KEYRING ONE support center",
+    "answer":  "https://help.keyring.app/keyring-one/getting-started"
+  },
+  {
+    "question": "KEYRING ONE Terms of Service",
+    "answer":  "https://one.keyring.app/term-of-service.pdf?v=3"
+  },
+  {
+    "question": "quesKEYRING ONE Privacy Policy",
+    "answer":  "https://one.keyring.app/privacy-policy.pdf?v=3"
+  },{
+    "question": "Security Audit Report for multisig - wallet-contracts",
+    "answer":  "https://github.com/blocksecteam/audit-reports/blob/main/solidity/blocksec_keyring_multisig_wallet_contracts_signed_20260713.pdf"
+  }
+]
