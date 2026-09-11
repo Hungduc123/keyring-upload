@@ -17,6 +17,13 @@ type Mode = "file" | "manual";
 
 const EMPTY_ITEM: FaqItem = { question: "", answer: "" };
 
+/** Pull the filename out of a `Content-Disposition` header, if present. */
+function parseFilename(header: string | null): string | null {
+  if (!header) return null;
+  const match = /filename="?([^"]+)"?/.exec(header);
+  return match ? match[1] : null;
+}
+
 const PROJECT_OPTIONS = [
   { value: "keyring-app", label: "Keyring" },
   { value: "coinpool", label: "Coinpool" },
@@ -38,6 +45,7 @@ export default function UploadPage() {
   const [items, setItems] = useState<FaqItem[]>([{ ...EMPTY_ITEM }]);
 
   const [submitting, setSubmitting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [result, setResult] = useState<UploadResponse | null>(null);
   const [topError, setTopError] = useState<string | null>(null);
 
@@ -154,6 +162,50 @@ export default function UploadPage() {
       setTopError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function onExportPdf() {
+    setTopError(null);
+
+    if (payload.length === 0) {
+      setTopError("No valid items to export");
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const res = await fetch("/api/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ project, items: payload }),
+      });
+
+      if (!res.ok) {
+        const data = await res
+          .json()
+          .catch(() => ({ error: "Could not generate PDF" }));
+        setTopError("error" in data ? data.error : "Could not generate PDF");
+        return;
+      }
+
+      const blob = await res.blob();
+      const filename =
+        parseFilename(res.headers.get("Content-Disposition")) ??
+        `${project}-faq.pdf`;
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setTopError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -336,15 +388,25 @@ export default function UploadPage() {
               {payload.length} valid item{payload.length === 1 ? "" : "s"} ready
               to upload
             </div>
-            <button
-              type="submit"
-              disabled={submitting || payload.length === 0}
-              className="rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium px-5 py-2.5"
-            >
-              {submitting
-                ? "Uploading..."
-                : `Upload to ${PROJECT_OPTIONS.find((p) => p.value === project)?.label ?? "Upstash"}`}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onExportPdf}
+                disabled={exporting || payload.length === 0}
+                className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 font-medium px-5 py-2.5"
+              >
+                {exporting ? "Preparing PDF..." : "Export PDF"}
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || payload.length === 0}
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium px-5 py-2.5"
+              >
+                {submitting
+                  ? "Uploading..."
+                  : `Upload to ${PROJECT_OPTIONS.find((p) => p.value === project)?.label ?? "Upstash"}`}
+              </button>
+            </div>
           </div>
         </form>
 
