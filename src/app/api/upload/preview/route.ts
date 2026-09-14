@@ -42,6 +42,13 @@ export async function POST(req: Request) {
   if ("response" in access) return access.response;
   const project = access.project;
 
+  // Mirrors the upload route: only a replaceAll upload prunes, so only then
+  // does the diff show rows as "will be deleted".
+  const replaceAll =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as { replaceAll?: unknown }).replaceAll === true
+      : false;
+
   const rawItems = Array.isArray(body)
     ? body
     : Array.isArray((body as { items?: unknown })?.items)
@@ -105,7 +112,8 @@ export async function POST(req: Request) {
   for (const v of valid) lastIndexById.set(v.id, v.index);
 
   const existing = new Map<string, { question: string; answer: string }>();
-  // Anything stored but absent from the file will be pruned on upload.
+  // Anything stored but absent from the file will be pruned on a replaceAll
+  // upload. Manual entry only adds and updates, so nothing is listed removed.
   const removed: DiffEntry[] = [];
   try {
     for (const entry of await fetchAllStored(project)) {
@@ -113,7 +121,7 @@ export async function POST(req: Request) {
         question: entry.question,
         answer: entry.answer,
       });
-      if (!lastIndexById.has(entry.id)) {
+      if (replaceAll && !lastIndexById.has(entry.id)) {
         removed.push({
           index: -1,
           id: entry.id,

@@ -21,7 +21,7 @@ type UpsertResult = {
   skipped: number;
   duplicates: number;
   failed: number;
-  /** Records removed because the uploaded file no longer contains them. */
+  /** Records pruned because a replaceAll upload no longer contains them. */
   deleted: number;
   ids: string[];
   skippedIds: string[];
@@ -47,6 +47,13 @@ export async function POST(req: Request) {
   const access = await requireProjectAccess(projectRaw);
   if ("response" in access) return access.response;
   const project = access.project;
+
+  // Pruning is opt-in: only a full-file upload replaces the index. Manual
+  // entry sends a partial list, so it must never delete what it omits.
+  const replaceAll =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as { replaceAll?: unknown }).replaceAll === true
+      : false;
 
   const rawItems = Array.isArray(body)
     ? body
@@ -131,8 +138,9 @@ export async function POST(req: Request) {
     byId.set(id, item);
   }
 
-  // Read the whole index: identical pairs are not re-sent, and anything the
-  // file no longer mentions is removed so the file stays the source of truth.
+  // Read the whole index so identical pairs are not re-sent. When replaceAll
+  // is set, anything the file no longer mentions is also pruned so the file
+  // stays the source of truth.
   const existing = new Map<string, { question: string; answer: string }>();
   const staleIds: string[] = [];
   try {
@@ -141,7 +149,7 @@ export async function POST(req: Request) {
         question: entry.question,
         answer: entry.answer,
       });
-      if (!byId.has(entry.id)) staleIds.push(entry.id);
+      if (replaceAll && !byId.has(entry.id)) staleIds.push(entry.id);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

@@ -249,6 +249,16 @@ export default function UploadClient({
     );
   }
 
+  // Results and diffs belong to the mode that produced them; carrying them
+  // across would misreport what the next upload is about to do.
+  function switchMode(next: Mode) {
+    setMode(next);
+    setTopError(null);
+    setResult(null);
+    setPreview(null);
+    setPreviewError(null);
+  }
+
   function addItem() {
     setItems((prev) => [...prev, { ...EMPTY_ITEM }]);
   }
@@ -286,7 +296,12 @@ export default function UploadClient({
       const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ project, items: payload }),
+        body: JSON.stringify({
+          project,
+          items: payload,
+          // Only a full-file upload replaces the index; manual entry upserts.
+          replaceAll: mode === "file",
+        }),
       });
       const data: UploadResponse | { error: string } = await res
         .json()
@@ -365,6 +380,7 @@ export default function UploadClient({
           body: JSON.stringify({
             project: forProject,
             items: itemsToCompare,
+            replaceAll: true,
           }),
         });
         const data: PreviewResponse | { error: string } = await res
@@ -614,21 +630,22 @@ export default function UploadClient({
         </div>
 
         <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1 mb-6">
-          <ModeButton active={mode === "file"} onClick={() => setMode("file")}>
+          <ModeButton
+            active={mode === "file"}
+            onClick={() => switchMode("file")}
+          >
             Upload JSON file
           </ModeButton>
           <ModeButton
             active={mode === "manual"}
-            onClick={() => setMode("manual")}
+            onClick={() => switchMode("manual")}
           >
             Enter manually
           </ModeButton>
           <ModeButton
             active={mode === "manage"}
             onClick={() => {
-              setMode("manage");
-              setTopError(null);
-              setResult(null);
+              switchMode("manage");
               if (!storedLoaded && !loadingStored) loadStored(null);
             }}
           >
@@ -858,6 +875,11 @@ export default function UploadClient({
             <div className="text-sm text-slate-600 dark:text-slate-400">
               {payload.length} valid item{payload.length === 1 ? "" : "s"} ready
               to upload
+              {mode === "manual" && (
+                <span className="block text-xs text-slate-500 dark:text-slate-500">
+                  Adds new items and updates existing ones. Nothing is deleted.
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <button
