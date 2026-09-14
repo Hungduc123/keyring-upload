@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  DEFAULT_PROJECT,
-  getVectorIndex,
-  isFaqItem,
-  isProjectKey,
-  type ProjectKey,
-} from "@/lib/upstash";
+import { getVectorIndex, isFaqItem } from "@/lib/upstash";
+import { requireProjectAccess } from "@/lib/session";
 import { buildEmbeddingText, makeId } from "@/lib/faq-diff";
 
 export const runtime = "nodejs";
@@ -21,18 +16,6 @@ type StoredFaq = {
   uploadedAt: string | null;
 };
 
-function resolveProject(
-  raw: unknown,
-): { project: ProjectKey } | { error: string } {
-  if (raw === undefined || raw === null || raw === "") {
-    return { project: DEFAULT_PROJECT };
-  }
-  if (!isProjectKey(raw)) {
-    return { error: `Unknown project "${String(raw)}"` };
-  }
-  return { project: raw };
-}
-
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
@@ -40,10 +23,8 @@ function asString(value: unknown): string {
 export async function GET(req: Request) {
   const url = new URL(req.url);
 
-  const resolved = resolveProject(url.searchParams.get("project"));
-  if ("error" in resolved) {
-    return NextResponse.json({ error: resolved.error }, { status: 400 });
-  }
+  const access = await requireProjectAccess(url.searchParams.get("project"));
+  if ("response" in access) return access.response;
 
   const cursor = url.searchParams.get("cursor") ?? "0";
 
@@ -57,7 +38,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const res = await getVectorIndex(resolved.project).range({
+    const res = await getVectorIndex(access.project).range({
       cursor,
       limit: limitNum,
       includeMetadata: true,
@@ -111,10 +92,8 @@ export async function PATCH(req: Request) {
     answer?: unknown;
   };
 
-  const resolved = resolveProject(projectRaw);
-  if ("error" in resolved) {
-    return NextResponse.json({ error: resolved.error }, { status: 400 });
-  }
+  const access = await requireProjectAccess(projectRaw);
+  if ("response" in access) return access.response;
 
   if (typeof idRaw !== "string" || !idRaw.trim()) {
     return NextResponse.json(
@@ -144,7 +123,7 @@ export async function PATCH(req: Request) {
   // record to a new id. Write the new one first, then drop the stale one.
   const newId = makeId({ question, answer });
 
-  const index = getVectorIndex(resolved.project);
+  const index = getVectorIndex(access.project);
 
   try {
     if (newId !== oldId) {
@@ -207,10 +186,8 @@ export async function DELETE(req: Request) {
     ids?: unknown;
   };
 
-  const resolved = resolveProject(projectRaw);
-  if ("error" in resolved) {
-    return NextResponse.json({ error: resolved.error }, { status: 400 });
-  }
+  const access = await requireProjectAccess(projectRaw);
+  if ("response" in access) return access.response;
 
   if (!Array.isArray(idsRaw) || idsRaw.length === 0) {
     return NextResponse.json(
@@ -238,7 +215,7 @@ export async function DELETE(req: Request) {
   }
 
   try {
-    const res = await getVectorIndex(resolved.project).delete({ ids });
+    const res = await getVectorIndex(access.project).delete({ ids });
     return NextResponse.json({ deleted: res.deleted, ids });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

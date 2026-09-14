@@ -17,19 +17,25 @@ function sign(payload: string): string {
 
 export function createSessionToken(username: string): string {
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
-  const payload = `${username}.${exp}`;
+  // The username is encoded so a name containing "." cannot forge the layout.
+  const payload = `${Buffer.from(username).toString("base64url")}.${exp}`;
   const signature = sign(payload);
   return `${payload}.${signature}`;
 }
 
+/**
+ * Verify the cookie and return the name it was issued to. Roles and project
+ * access are deliberately NOT carried in the token — they are looked up from
+ * the user store on every request, so revoking access takes effect at once.
+ */
 export function verifySessionToken(token: string | undefined): {
   username: string;
 } | null {
   if (!token) return null;
   const parts = token.split(".");
   if (parts.length !== 3) return null;
-  const [username, exp, signature] = parts;
-  const expected = sign(`${username}.${exp}`);
+  const [encodedUsername, exp, signature] = parts;
+  const expected = sign(`${encodedUsername}.${exp}`);
 
   const a = Buffer.from(signature);
   const b = Buffer.from(expected);
@@ -40,24 +46,10 @@ export function verifySessionToken(token: string | undefined): {
   if (!Number.isFinite(expNum) || expNum < Math.floor(Date.now() / 1000)) {
     return null;
   }
+
+  const username = Buffer.from(encodedUsername, "base64url").toString("utf8");
+  if (!username) return null;
   return { username };
-}
-
-export function validateCredentials(
-  username: string,
-  password: string,
-): boolean {
-  const u = process.env.ADMIN_USERNAME ?? "";
-  const p = process.env.ADMIN_PASSWORD ?? "";
-  if (!u || !p) return false;
-
-  const ub = Buffer.from(username);
-  const pb = Buffer.from(password);
-  const eub = Buffer.from(u);
-  const epb = Buffer.from(p);
-
-  if (ub.length !== eub.length || pb.length !== epb.length) return false;
-  return timingSafeEqual(ub, eub) && timingSafeEqual(pb, epb);
 }
 
 export const AUTH_COOKIE_NAME = COOKIE_NAME;

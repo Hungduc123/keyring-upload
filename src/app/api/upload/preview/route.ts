@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  DEFAULT_PROJECT,
-  isFaqItem,
-  isProjectKey,
-  type FaqItem,
-} from "@/lib/upstash";
+import { isFaqItem, type FaqItem } from "@/lib/upstash";
+import { requireProjectAccess } from "@/lib/session";
 import { diffStatus, fetchAllStored, makeId, type DiffStatus } from "@/lib/faq-diff";
 
 export const runtime = "nodejs";
@@ -42,13 +38,9 @@ export async function POST(req: Request) {
     body && typeof body === "object" && !Array.isArray(body)
       ? (body as { project?: unknown }).project
       : undefined;
-  if (projectRaw !== undefined && !isProjectKey(projectRaw)) {
-    return NextResponse.json(
-      { error: `Unknown project "${String(projectRaw)}"` },
-      { status: 400 },
-    );
-  }
-  const project = isProjectKey(projectRaw) ? projectRaw : DEFAULT_PROJECT;
+  const access = await requireProjectAccess(projectRaw);
+  if ("response" in access) return access.response;
+  const project = access.project;
 
   const rawItems = Array.isArray(body)
     ? body

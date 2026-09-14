@@ -3,8 +3,10 @@ import {
   AUTH_COOKIE_MAX_AGE,
   AUTH_COOKIE_NAME,
   createSessionToken,
-  validateCredentials,
 } from "@/lib/auth";
+import { authenticate } from "@/lib/users";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   let body: { username?: unknown; password?: unknown };
@@ -24,15 +26,34 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!validateCredentials(username, password)) {
+  let user;
+  try {
+    user = authenticate(username, password);
+  } catch (err) {
+    // A malformed APP_USERS is a deployment error, not a bad password.
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json(
+      { error: `Auth misconfigured: ${message}` },
+      { status: 500 },
+    );
+  }
+
+  if (!user) {
     return NextResponse.json(
       { error: "Invalid username or password" },
       { status: 401 },
     );
   }
 
-  const token = createSessionToken(username);
-  const res = NextResponse.json({ ok: true });
+  if (user.projects.length === 0) {
+    return NextResponse.json(
+      { error: "This account has no project access configured." },
+      { status: 403 },
+    );
+  }
+
+  const token = createSessionToken(user.username);
+  const res = NextResponse.json({ ok: true, role: user.role });
   res.cookies.set(AUTH_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",

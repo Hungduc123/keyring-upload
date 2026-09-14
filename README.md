@@ -20,6 +20,37 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Accounts and project access
+
+Accounts live in the `APP_USERS` environment variable: a JSON array on a single
+line. An `admin` sees every project; an `editor` sees only the projects listed
+for it, both in the UI and in the API.
+
+```
+APP_USERS='[{"username":"admin","password":"...","role":"admin"},{"username":"keyring-one","password":"...","role":"editor","projects":["keyring-one"]}]'
+```
+
+| Field      | Required | Notes                                                            |
+| ---------- | -------- | ---------------------------------------------------------------- |
+| `username` | yes      | Login name.                                                      |
+| `password` | yes      | Plain text; keep it in the env var, never in the repo.           |
+| `role`     | no       | `admin` or `editor`. Defaults to `editor`.                       |
+| `projects` | editors  | Project keys this account may use. Admins get all of them.       |
+
+Valid project keys are the ones in `PROJECTS` in [`src/lib/upstash.ts`](src/lib/upstash.ts):
+`keyring-app`, `coinpool`, `coinpool-prod`, `nft-viewer`, `keyring-one`. An
+unknown key makes login fail with an explicit configuration error rather than
+silently granting nothing.
+
+`ADMIN_USERNAME` / `ADMIN_PASSWORD` still work and count as an admin, so an
+existing deployment keeps working before `APP_USERS` is set. An `APP_USERS`
+entry with the same username takes precedence.
+
+Roles are resolved from the environment on every request, not stored in the
+session cookie — removing an account signs it out at once, and every API route
+re-checks project access, so a limited account cannot reach another project by
+editing the request.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

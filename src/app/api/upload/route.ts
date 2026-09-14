@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  DEFAULT_PROJECT,
-  getVectorIndex,
-  isFaqItem,
-  isProjectKey,
-  type FaqItem,
-} from "@/lib/upstash";
+import { getVectorIndex, isFaqItem, type FaqItem } from "@/lib/upstash";
+import { requireProjectAccess } from "@/lib/session";
 import {
   buildEmbeddingText,
   chunk,
@@ -49,13 +44,9 @@ export async function POST(req: Request) {
     body && typeof body === "object" && !Array.isArray(body)
       ? (body as { project?: unknown }).project
       : undefined;
-  const project = isProjectKey(projectRaw) ? projectRaw : DEFAULT_PROJECT;
-  if (projectRaw !== undefined && !isProjectKey(projectRaw)) {
-    return NextResponse.json(
-      { error: `Unknown project "${String(projectRaw)}"` },
-      { status: 400 },
-    );
-  }
+  const access = await requireProjectAccess(projectRaw);
+  if ("response" in access) return access.response;
+  const project = access.project;
 
   const rawItems = Array.isArray(body)
     ? body
@@ -228,14 +219,9 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const projectRaw = url.searchParams.get("project");
-  if (projectRaw !== null && !isProjectKey(projectRaw)) {
-    return NextResponse.json(
-      { error: `Unknown project "${projectRaw}"` },
-      { status: 400 },
-    );
-  }
-  const project = isProjectKey(projectRaw) ? projectRaw : DEFAULT_PROJECT;
+  const access = await requireProjectAccess(url.searchParams.get("project"));
+  if ("response" in access) return access.response;
+  const project = access.project;
 
   try {
     const info = await getVectorIndex(project).info();
